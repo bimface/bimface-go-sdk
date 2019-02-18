@@ -8,12 +8,12 @@ import "fmt"
 
 //SupportFile ***
 type SupportFile struct {
-	Length int64
-	Types  []string
+	Length int64    `json:"length"`
+	Types  []string `json:"types"`
 }
 
 //NewSupportFile ***
-func NewSupportFile() *SupportFile { //length int64, types []string
+func NewSupportFile() *SupportFile { //length int64, types []*string
 	o := &SupportFile{
 		// Length: length,
 		Types: make([]string, 0),

@@ -8,9 +8,9 @@ import "fmt"
 
 //Category ***
 type Category struct {
-	CategoryID   string
-	CategoryName string
-	Families     []Family
+	ID       string    `json:"categoryId"`
+	Name     string    `json:"categoryName"`
+	Families []*Family `json:"families"`
 }
 
 //NewCategory ***
@@ -18,13 +18,12 @@ func NewCategory() *Category { //id int64, name string
 	o := &Category{
 		// CategoryID:   id,
 		// CategoryName: name,
-		Families: make([]Family, 0),
+		Families: make([]*Family, 0),
 	}
 	return o
 }
 
 // ToString get the string
 func (o *Category) ToString() string {
-	return fmt.Sprintf("CategoryBean [CategoryID=%s, CategoryName=%s, Families=%v]",
-		o.CategoryID, o.CategoryName, o.Families)
+	return fmt.Sprintf("CategoryBean [ID=%s, Name=%s, Families=%v]", o.ID, o.Name, o.Families)
 }

@@ -7,11 +7,9 @@ package service
 import (
 	"fmt"
 
-	"github.com/chnykn/bimface/bean"
 	"github.com/chnykn/bimface/bean/request"
 	"github.com/chnykn/bimface/bean/response"
 	"github.com/chnykn/bimface/config"
-	"github.com/chnykn/bimface/http"
 	"github.com/chnykn/bimface/utils"
 
 	"github.com/imroc/req"
@@ -35,12 +33,12 @@ type IntegrateService struct {
 }
 
 //NewIntegrateService ***
-func NewIntegrateService(serviceClient *http.ServiceClient, endpoint *config.Endpoint,
+func NewIntegrateService(serviceClient *utils.ServiceClient, endpoint *config.Endpoint,
 	credential *config.Credential, accessTokenService *AccessTokenService) *IntegrateService {
 	o := &IntegrateService{
 		AbstractService: AbstractService{
 			Endpoint:      endpoint,
-			ServiceClient: serviceClient, //http.NewServiceClient(),
+			ServiceClient: serviceClient, //utils.NewServiceClient(),
 		},
 		AccessTokenService: accessTokenService,
 	}
@@ -62,7 +60,7 @@ func (o *IntegrateService) deleteIntegrateURL(integrateID int64) string {
 	return fmt.Sprintf(o.Endpoint.APIHost+deleteIntegrateURI, integrateID)
 }
 
-//---------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
 
 //Integrate 模型集成相关: 发起模型集成
 //http://doc.bimface.com/book/restful/articles/api/integrate/put-integrate.html
@@ -79,67 +77,73 @@ name					String		N	调用方设置的名称
 priority				Number		Y	优先级，数字越大，优先级越低	1, 2, 3
 callback				String		N	Callback地址，待集成完毕以后，BIMFACE会回调该地址
 ***/
-func (o *IntegrateService) Integrate(integrateRequest *request.IntegrateRequest) (*response.Integration, *utils.Error) {
+func (o *IntegrateService) Integrate(intgrRequest *request.IntgrRequest) (*response.IntgrStatus, error) {
 	accessToken, err := o.AccessTokenService.Get()
 	if err != nil {
 		return nil, err
 	}
 
-	headers := http.NewHeaders()
+	headers := utils.NewHeaders()
 	headers.AddOAuth2Header(accessToken.Token)
 
-	body := req.BodyJSON(integrateRequest)
+	body := req.BodyJSON(intgrRequest)
 	resp := o.ServiceClient.Put(o.integrateURL(), headers.Header, body)
 
-	result := response.NewIntegration()
-	err = http.RespToBean(resp, result)
+	result := response.NewIntgrStatus()
+	err = utils.RespToBean(resp, result)
 
 	return result, err
+}
+
+//-----------------------------------------------------------------------------------
+
+//GetIntegrateStatusResp ***
+func (o *IntegrateService) GetIntegrateStatusResp(integrateID int64) (*req.Resp, error) {
+	accessToken, err := o.AccessTokenService.Get()
+	if err != nil {
+		return nil, err
+	}
+
+	headers := utils.NewHeaders()
+	headers.AddOAuth2Header(accessToken.Token)
+
+	resp := o.ServiceClient.Get(o.getIntegrateURL(integrateID), headers.Header)
+	return resp, err
 }
 
 //GetIntegrateStatus 模型集成相关: 获取集成状态
 //http://doc.bimface.com/book/restful/articles/api/integrate/get-integrate.html
-func (o *IntegrateService) GetIntegrateStatus(integrateID int64) (*response.Integration, *utils.Error) {
-	accessToken, err := o.AccessTokenService.Get()
+func (o *IntegrateService) GetIntegrateStatus(integrateID int64) (*response.IntgrStatus, error) {
+	resp, err := o.GetIntegrateStatusResp(integrateID)
 	if err != nil {
 		return nil, err
 	}
 
-	headers := http.NewHeaders()
-	headers.AddOAuth2Header(accessToken.Token)
-
-	resp := o.ServiceClient.Get(o.getIntegrateURL(integrateID), headers.Header)
-
-	result := response.NewIntegration()
-	err = http.RespToBean(resp, result)
+	result := response.NewIntgrStatus()
+	err = utils.RespToBean(resp, result)
 
 	return result, err
 }
 
-//GetIntegrate same to GetIntegrateStatus
-func (o *IntegrateService) GetIntegrate(integrateID int64) (*response.Integration, *utils.Error) {
-	return o.GetIntegrateStatus(integrateID)
-}
+//-----------------------------------------------------------------------------------
 
 //DeleteIntegrate 模型集成相关: 删除集成模型
 //http://doc.bimface.com/book/restful/articles/api/integrate/delete-integrate.html
-func (o *IntegrateService) DeleteIntegrate(integrateID int64) (string, *utils.Error) {
+func (o *IntegrateService) DeleteIntegrate(integrateID int64) (string, error) {
 	accessToken, err := o.AccessTokenService.Get()
 	if err != nil {
 		return "", err
 	}
 
-	headers := http.NewHeaders()
+	headers := utils.NewHeaders()
 	headers.AddOAuth2Header(accessToken.Token)
 
 	resp := o.ServiceClient.Delete(o.deleteIntegrateURL(integrateID), headers.Header)
 
-	var result *bean.GeneralResponse
-	result, err = http.RespToGeneralResponse(resp)
-
-	if err == nil {
-		return result.Code, nil
+	result, err := utils.RespToResult(resp)
+	if err != nil {
+		return result.Code, err
 	}
 
-	return "", err
+	return result.Code, nil
 }

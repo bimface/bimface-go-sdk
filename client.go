@@ -7,8 +7,8 @@ package bimface
 import (
 	"github.com/chnykn/bimface/config"
 	"github.com/chnykn/bimface/consts"
-	"github.com/chnykn/bimface/http"
 	"github.com/chnykn/bimface/service"
+	"github.com/chnykn/bimface/utils"
 )
 
 // Client for binface SDK
@@ -16,24 +16,25 @@ type Client struct {
 	credential *config.Credential
 	endpoint   *config.Endpoint
 
-	serviceClient      *http.ServiceClient
+	serviceClient      *utils.ServiceClient
 	AccessTokenService *service.AccessTokenService
 	SupportFileService *service.SupportFileService
 
-	AppendFileService     *service.AppendFileService
-	CategoryTreeService   *service.CategoryTreeService
-	CompareService        *service.CompareService
-	DownloadService       *service.DownloadService
-	DrawingSheetsService  *service.DrawingSheetsService
-	ElementService        *service.ElementService
-	ElevService           *service.ElevService
-	IntegrateService      *service.IntegrateService
-	OfflineDatabagService *service.OfflineDatabagService
-	PropertyService       *service.PropertyService
-	ShareLinkService      *service.ShareLinkService
-	TranslateService      *service.TranslateService
-	UploadService         *service.UploadService
-	ViewTokenService      *service.ViewTokenService
+	AppendFileService    *service.AppendFileService
+	CategoryTreeService  *service.CategoryTreeService
+	CompareService       *service.CompareService
+	DownloadService      *service.DownloadService
+	DrawingSheetsService *service.DrawingSheetsService
+	ElementService       *service.ElementService
+	FloorService         *service.FloorService
+	IntegrateService     *service.IntegrateService
+	IntgrTreeService     *service.IntgrTreeService
+	DatabagService       *service.DatabagService
+	PropertyService      *service.PropertyService
+	ShareLinkService     *service.ShareLinkService
+	TranslateService     *service.TranslateService
+	UploadService        *service.UploadService
+	ViewTokenService     *service.ViewTokenService
 }
 
 // NewClient create an bimface client.
@@ -45,7 +46,7 @@ func NewClient(appKey string, appSecret string, endpoint *config.Endpoint) *Clie
 	o := &Client{
 		credential:    config.NewCredential(appKey, appSecret),
 		endpoint:      endpoint,
-		serviceClient: http.NewServiceClient(),
+		serviceClient: utils.NewServiceClient(),
 	}
 	o.AccessTokenService = service.NewAccessTokenService(o.serviceClient, o.endpoint, o.credential)
 	o.SupportFileService = service.NewSupportFileService(o.serviceClient, o.endpoint, o.credential, o.AccessTokenService)
@@ -56,9 +57,10 @@ func NewClient(appKey string, appSecret string, endpoint *config.Endpoint) *Clie
 	o.DownloadService = service.NewDownloadService(o.serviceClient, o.endpoint, o.credential, o.AccessTokenService)
 	o.ElementService = service.NewElementService(o.serviceClient, o.endpoint, o.credential, o.AccessTokenService)
 	o.DrawingSheetsService = service.NewDrawingSheetsService(o.serviceClient, o.endpoint, o.credential, o.AccessTokenService)
-	o.ElevService = service.NewElevService(o.serviceClient, o.endpoint, o.credential, o.AccessTokenService)
+	o.FloorService = service.NewFloorService(o.serviceClient, o.endpoint, o.credential, o.AccessTokenService)
 	o.IntegrateService = service.NewIntegrateService(o.serviceClient, o.endpoint, o.credential, o.AccessTokenService)
-	o.OfflineDatabagService = service.NewOfflineDatabagService(o.serviceClient, o.endpoint, o.credential, o.AccessTokenService)
+	o.IntgrTreeService = service.NewIntgrTreeService(o.serviceClient, o.endpoint, o.credential, o.AccessTokenService)
+	o.DatabagService = service.NewDatabagService(o.serviceClient, o.endpoint, o.credential, o.AccessTokenService)
 	o.PropertyService = service.NewPropertyService(o.serviceClient, o.endpoint, o.credential, o.AccessTokenService)
 	o.ShareLinkService = service.NewShareLinkService(o.serviceClient, o.endpoint, o.credential, o.AccessTokenService)
 	o.TranslateService = service.NewTranslateService(o.serviceClient, o.endpoint, o.credential, o.AccessTokenService)
